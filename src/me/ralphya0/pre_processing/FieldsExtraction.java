@@ -17,7 +17,7 @@ public class FieldsExtraction {
     static {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            connection = DriverManager.getConnection("jdbc:mysql://xxxx/xxx", "xxx", "xxx");
+            connection = DriverManager.getConnection("jdbc:mysql://202.113.76.229/ccf", "xx", "xx");
             
         } catch (ClassNotFoundException e) {
             // TODO Auto-generated catch block
@@ -92,10 +92,32 @@ public class FieldsExtraction {
         if(rs != null ){
             while(rs.next()){
                 counter ++;
-                sb.append(rs.getBigDecimal("url_crc") + ",");
-                sb.append(rs.getString("location") + ",");
-                sb.append(rs.getString("province") + ",");
-                sb.append(rs.getString("gender") + ",");
+                
+                if(rs.getBigDecimal("url_crc") != null){
+                    sb.append(rs.getBigDecimal("url_crc") + ",");
+                }
+                else
+                    sb.append(" ,");
+                
+                String location = rs.getString("location");
+                if(location != null)
+                    sb.append(location + ",");
+                else
+                    sb.append(" ,");
+                
+                String province = rs.getString("province");
+                if(province != null)
+                    sb.append(province + ",");
+                else
+                    sb.append(" ,");
+                
+                String gender = rs.getString("gender");
+                if(gender != null)
+                    sb.append(gender + ",");
+                else
+                    sb.append(" ,");
+                
+                
                 String createDate = rs.getString("created_at");
                 if(createDate != null){
                     String [] ls = createDate.split("-");
@@ -105,11 +127,41 @@ public class FieldsExtraction {
                    
                     sb.append(months + ",");
                 }
-                sb.append(rs.getInt("followers_count") + ",");
-                sb.append(rs.getInt("friends_count") + ",");
-                sb.append(rs.getInt("statuses_count") + ",");
-                sb.append(rs.getInt("active_days") + ",");
-                sb.append(rs.getString("level_now") + ",");
+                else{
+                    sb.append(" ,");
+                }
+                
+                Integer followers = rs.getInt("followers_count");
+                if(followers != null)
+                    sb.append(followers + ",");
+                else
+                    sb.append(" ,");
+                
+                Integer friends = rs.getInt("friends_count");
+                if(friends != null)
+                    sb.append(friends + ",");
+                else
+                    sb.append(" ,");
+                
+                Integer statuses = rs.getInt("statuses_count");
+                if(statuses != null)
+                    sb.append(statuses + ",");
+                else
+                    sb.append(" ,");
+                
+                Integer active = rs.getInt("active_days");
+                if(active != null)
+                    sb.append(active + ",");
+                else
+                    sb.append(" ,");
+                
+                String level = rs.getString("level_now");
+                if(level != null)
+                    sb.append(level + ",");
+                else
+                    sb.append(" ,");
+                
+                
                 String daren = rs.getString("daren_level");
                 if(daren == null)
                     sb.append(0 + "\n");
@@ -144,6 +196,7 @@ public class FieldsExtraction {
                         break;
                     }
                 }
+                
             }
             
             try {
