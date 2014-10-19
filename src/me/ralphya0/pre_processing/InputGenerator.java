@@ -21,10 +21,11 @@ public class InputGenerator {
         int round = 1;
         int count = 0;
         do{
-            sql = "select title,format_content,abs from t_lable_group_comp limit " + (round - 1) * 2000 + ",2000";
+            sql = "select source_type,title,format_content from t_lable_group_comp limit " + (round - 1) * 2000 + ",2000";
             rs = ps.executeQuery(sql);
+            
             count = batchProcess(path,rs);
-            System.out.println("已处理2000条");
+            System.out.println("round " + round);
             round ++;
             rs.close();
         }while(count == 2000);
@@ -41,15 +42,22 @@ public class InputGenerator {
             while(rs.next()){
                 counter ++;
                 
+                int type = rs.getInt("source_type");
                 String title = rs.getString("title");
                 String content = rs.getString("format_content");
-                String abs = rs.getString("abs");
-                sb.append(title + " " + abs + " " + content + " \n");
+                //System.out.println(title);
+                if(type == 4){
+                	
+                	sb.append(content + " \n");
+                }
+                else{
+                	sb.append(title + " " + content + " \n");
+                }
                 
                 
             }
             bw = new BufferedWriter(new FileWriter(path,true));
-            bw.write(sb.toString());
+            bw.write(new String(sb.toString().getBytes(),"utf-8"));
             bw.close();
             
         }

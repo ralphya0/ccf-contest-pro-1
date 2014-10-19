@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class FieldsExtraction {
+/*public class FieldsExtraction {
 
     long counter;
     static Connection connection;
@@ -34,7 +34,7 @@ public class FieldsExtraction {
         ResultSet rs = null;
         int resultSetCounter = 0;
         long round = 1;
-        System.out.println("¿ªÊ¼...");
+        System.out.println("ï¿½ï¿½Ê¼...");
         try {
             
             do{
@@ -46,7 +46,7 @@ public class FieldsExtraction {
                 round ++;
             }
             while(resultSetCounter == 5000);
-            System.out.println("Íê³É.");
+            System.out.println("ï¿½ï¿½ï¿½.");
             
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -167,31 +167,31 @@ public class FieldsExtraction {
                     sb.append(0 + "\n");
                 else{
                     switch(daren){
-                    case "³õ¼¶´ïÈË" :
+                    case "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(1 + "\n");
                         break;
-                    case "ÖÐ¼¶´ïÈË" :
+                    case "ï¿½Ð¼ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(2 + "\n");
                         break;
-                    case "¸ß¼¶´ïÈË" :
+                    case "ï¿½ß¼ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(3 + "\n");
                         break;
-                    case "°×Òø´ïÈË" :
+                    case "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(4 + "\n");
                         break;
-                    case "»Æ½ð´ïÈË" :
+                    case "ï¿½Æ½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(5 + "\n");
                         break;
-                    case "°×½ð´ïÈË" :
+                    case "ï¿½×½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(6 + "\n");
                         break;
-                    case "ÐÇ×ê´ïÈË" :
+                    case "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(7 + "\n");
                         break;
-                    case "¾§×ê´ïÈË" :
+                    case "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(8 + "\n");
                         break;
-                    case "è­×ê´ïÈË" :
+                    case "ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" :
                         sb.append(9 + "\n");
                         break;
                     }
@@ -202,7 +202,7 @@ public class FieldsExtraction {
             try {
                 writer = new BufferedWriter(new FileWriter(path,true));
                 writer.write(sb.toString());
-                System.out.println("Ïò" + path + "Ð´Èë" + counter + " Ìõ¼ÇÂ¼");
+                System.out.println("ï¿½ï¿½" + path + "Ð´ï¿½ï¿½" + counter + " ï¿½ï¿½ï¿½ï¿½Â¼");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -216,4 +216,4 @@ public class FieldsExtraction {
     }
     
     
-}
+}*/

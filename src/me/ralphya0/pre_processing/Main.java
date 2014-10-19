@@ -8,13 +8,13 @@ public class Main {
     public static void main(String[] args) throws SQLException, IOException {
         // TODO Auto-generated method stub
         /*FieldsExtraction fe = new FieldsExtraction();
-        String path = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\w_user_info_comp.csv";
+        String path = "F:\\work-space\\project-base\\ccf\\data\\锟斤拷锟斤拷锟斤拷全锟铰硷拷\\result\\w_user_info_comp.csv";
         fe.extractAndOutput(path);
         ScoreComputing sc = new ScoreComputing();
         sc.fetching();*/
         
         InputGenerator ig = new InputGenerator();
-        ig.inputFileGenerator("F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-18\\word2vec_input.txt");
+        ig.inputFileGenerator("/home/ralphya0/ccf-competition/result/2014-10-18/word2vec_input.txt");
     }
 
 }
