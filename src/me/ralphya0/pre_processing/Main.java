@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) throws SQLException, IOException {
         // TODO Auto-generated method stub
         /*FieldsExtraction fe = new FieldsExtraction();
-        String path = "F:\\work-space\\project-base\\ccf\\data\\������ȫ�¼�\\result\\w_user_info_comp.csv";
+        String path = "F:\\work-space\\project-base\\ccf\\data\\result\\w_user_info_comp.csv";
         fe.extractAndOutput(path);
         ScoreComputing sc = new ScoreComputing();
         sc.fetching();*/

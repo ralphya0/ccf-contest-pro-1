@@ -142,7 +142,6 @@ public class ScoreComputing {
             connection.commit();
             ps.close();
             
-            //System.out.println("已更新1000条记录... round ");
         }
         return counter;
     }

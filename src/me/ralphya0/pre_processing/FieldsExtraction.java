@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/*public class FieldsExtraction {
+public class FieldsExtraction {
 
     long counter;
     static Connection connection;
@@ -34,7 +34,6 @@ import java.sql.SQLException;
         ResultSet rs = null;
         int resultSetCounter = 0;
         long round = 1;
-        System.out.println("��ʼ...");
         try {
             
             do{
@@ -46,7 +45,6 @@ import java.sql.SQLException;
                 round ++;
             }
             while(resultSetCounter == 5000);
-            System.out.println("���.");
             
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -167,31 +165,31 @@ import java.sql.SQLException;
                     sb.append(0 + "\n");
                 else{
                     switch(daren){
-                    case "��������" :
+                    case "初级达人" :
                         sb.append(1 + "\n");
                         break;
-                    case "�м�����" :
+                    case "中级达人" :
                         sb.append(2 + "\n");
                         break;
-                    case "�߼�����" :
+                    case "高级达人" :
                         sb.append(3 + "\n");
                         break;
-                    case "�������" :
+                    case "白银达人" :
                         sb.append(4 + "\n");
                         break;
-                    case "�ƽ����" :
+                    case "黄金达人":
                         sb.append(5 + "\n");
                         break;
-                    case "�׽����" :
+                    case "白金达人" :
                         sb.append(6 + "\n");
                         break;
-                    case "�������" :
+                    case "星钻达人" :
                         sb.append(7 + "\n");
                         break;
-                    case "�������" :
+                    case "晶钻达人" :
                         sb.append(8 + "\n");
                         break;
-                    case "������" :
+                    case "璀钻达人" :
                         sb.append(9 + "\n");
                         break;
                     }
@@ -202,7 +200,6 @@ import java.sql.SQLException;
             try {
                 writer = new BufferedWriter(new FileWriter(path,true));
                 writer.write(sb.toString());
-                System.out.println("��" + path + "д��" + counter + " ����¼");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -216,4 +213,4 @@ import java.sql.SQLException;
     }
     
     
-}*/
+}
