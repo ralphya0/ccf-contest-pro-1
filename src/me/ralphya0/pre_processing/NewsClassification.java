@@ -96,9 +96,8 @@ public class NewsClassification {
 		String output2 = "";
 		
 		Map<String,Double> aveValue = new HashMap<String,Double>();
-		double a = 0;
-		double b = 0;
-		double c = 0;
+		
+		
 		StringBuilder sb = new StringBuilder();
 		if(type == 1){
 		    //计算话题关键词平均权重
@@ -145,6 +144,7 @@ public class NewsClassification {
         
         //根据话题关键词平均权重计算各条新闻的余弦值
         String [] topicKeys = aveValue.keySet().toArray(new String[0]);
+        double b = 0;
         
         for(String s : topicKeys){
             b += Math.pow(aveValue.get(s), 2);
@@ -155,6 +155,8 @@ public class NewsClassification {
         String l = "";
         StringBuilder sb2 = new StringBuilder();
         while((l = br.readLine()) != null){
+            double c = 0;
+            double a = 0;
             String [] ls = l.split(",");
             if(ls != null){
                 String [] words = ls[1].split("#");
