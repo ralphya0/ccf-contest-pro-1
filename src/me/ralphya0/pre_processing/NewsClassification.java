@@ -2,6 +2,7 @@ package me.ralphya0.pre_processing;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -51,7 +52,26 @@ public class NewsClassification {
 	    fetching(1);
 	}
 	
-	
+	public NewsClassification(int f) throws SQLException, IOException{
+	    connection = new DB().getConn();
+        st1 = connection.createStatement();
+	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong-topic-cosin-new.csv";
+        String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan-topic-cosin-new.csv";
+        String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao-topic-cosin-new.csv";
+        String sql1 = "update violence set cosin = #1 where idnum = @2;";
+        String sql2 = "update campus set cosin = #1 where idnum = @2;";
+        String sql3 = "update bus_explosion set cosin = #1 where idnum = @2;";
+        
+        additionalTool(in1, sql1);
+        additionalTool(in2, sql2);
+        additionalTool(in3, sql3);
+        
+        st1.close();
+        connection.close();
+        System.out.println("All done!");
+        
+        
+	}
 	
 	Map<String,Map<String,Double>> terrorist = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> campus = new HashMap<String,Map<String,Double>>();
@@ -63,8 +83,13 @@ public class NewsClassification {
 
 	public void fetching(int type) throws SQLException, IOException{
 	    
-	    if(type > 3)
+	    if(type > 3){
+	        st1.close();
+	        st2.close();
+	        connection.close();
 	        return ;
+	    
+	    }
 
 		ResultSet rs = null;
 		
@@ -343,5 +368,36 @@ public class NewsClassification {
 			
 		}
 		return counter;
+	}
+	
+	public void additionalTool(String file,String sql) throws IOException, SQLException{
+	    //更新表中的cosin字段
+	    
+	    BufferedReader br = new BufferedReader(new FileReader(file));
+	    String l = "";
+	    int counter = 0;
+	    StringBuilder sb = new StringBuilder();
+	    while((l = br.readLine()) != null){
+	        //if(counter < 500){
+	            String[] ll = l.split(",");
+	            
+	            if(ll != null){
+	                String s = sql.replace("#1", ll[1]).replace("@2", ll[0]);
+	                st1.executeUpdate(s);
+	                //sb.append(s);
+	                //counter ++;
+	            }
+	        //}
+	        /*else{
+	            System.out.println(sb.toString());
+	            st1.executeUpdate(sb.toString());
+	            sb = null;
+	            sb = new StringBuilder();
+	            counter = 0;
+	        }*/
+	        
+	    }
+	    br.close();
+	    System.out.println("current round complete!");
 	}
 }

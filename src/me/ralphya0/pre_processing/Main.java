@@ -14,10 +14,10 @@ public class Main {
         sc.fetching();
         
         InputGenerator ig = new InputGenerator();
-        ig.inputFileGenerator("/home/ralphya0/ccf-competition/result/2014-10-18/word2vec_input.txt");*/
+        ig.inputFileGenerator("/home/ralphya0/ccf-competition/result/2014-10-18/word2vec_input.txt");
         
-        NewsClassification nc = new NewsClassification();
-        
+        NewsClassification nc = new NewsClassification();*/
+        NewsClassification nc = new NewsClassification(1);
     }
 
 }
