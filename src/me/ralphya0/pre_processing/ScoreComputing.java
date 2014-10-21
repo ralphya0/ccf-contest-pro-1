@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,13 +14,15 @@ import me.ralphya0.tools.DB;
 public class ScoreComputing {
 
     Connection connection = null;
-    
+    Statement ps = null;
+    Statement ps2 = null;
     
     
     public void fetching() throws SQLException{
         connection = new DB().getConn();
-        connection.setAutoCommit(false);
-        
+        ps = connection.createStatement();
+        ps2 = connection.createStatement();
+        ResultSet rs = null;
         int round = 1;
         int items = 0;
         do{
@@ -27,24 +30,22 @@ public class ScoreComputing {
             String sql = "select idnum,title_important,abs_important,content_important from t_lable_group_comp"
                     + " limit " + (round - 1)*500 + ",500";
             
-            PreparedStatement ps = connection.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery(sql);
             items = computingAndUpdating(rs);
             round ++;
-            rs.close();
-            ps.close();
-            ps = null;
-            rs = null;
             System.out.println("round " + round);
         }while(items == 500);
         System.out.println("Done!");
+        rs.close();
+        ps.close();
+        ps2.close();
         connection.close();
     }
     
     public int computingAndUpdating(ResultSet rs) throws SQLException{
         int counter = 0;
         
-        PreparedStatement ps = null;
+        
         if(rs != null){
             while(rs.next()){
                 int id = rs.getInt("idnum");
@@ -134,13 +135,10 @@ public class ScoreComputing {
                 
                 scores.clear();
                 pro.clear();
-                ps = connection.prepareStatement(us.toString());
-                ps.addBatch();
+                ps2.executeQuery(us.toString());
+                us = null;
             }
             
-            ps.executeBatch();
-            connection.commit();
-            ps.close();
             
         }
         return counter;

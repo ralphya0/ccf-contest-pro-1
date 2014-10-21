@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class FieldsExtraction {
 
@@ -28,9 +29,9 @@ public class FieldsExtraction {
         }
     }
     
-    public void extractAndOutput(String outputpath) {
+    public void extractAndOutput(String outputpath) throws SQLException {
        
-        PreparedStatement ps = null;
+        Statement ps = connection.createStatement();
         ResultSet rs = null;
         int resultSetCounter = 0;
         long round = 1;
@@ -39,8 +40,7 @@ public class FieldsExtraction {
             do{
                 String sql = "select url_crc,location,province,gender,created_at,followers_count,friends_count,statuses_count,"
                         + "active_days,level_now,daren_level from w_user_info_comp limit " + (round - 1)*5000 + ",5000";
-                ps = connection.prepareStatement(sql);
-                rs = ps.executeQuery();
+                rs = ps.executeQuery(sql);
                 resultSetCounter = recordReader(rs,outputpath);
                 round ++;
             }
