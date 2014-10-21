@@ -11,10 +11,13 @@ public class Main {
         String path = "F:\\work-space\\project-base\\ccf\\data\\result\\w_user_info_comp.csv";
         fe.extractAndOutput(path);
         ScoreComputing sc = new ScoreComputing();
-        sc.fetching();*/
+        sc.fetching();
         
         InputGenerator ig = new InputGenerator();
-        ig.inputFileGenerator("/home/ralphya0/ccf-competition/result/2014-10-18/word2vec_input.txt");
+        ig.inputFileGenerator("/home/ralphya0/ccf-competition/result/2014-10-18/word2vec_input.txt");*/
+        
+        NewsClassification nc = new NewsClassification();
+        
     }
 
 }

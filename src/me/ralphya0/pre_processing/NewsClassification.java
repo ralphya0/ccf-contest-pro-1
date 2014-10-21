@@ -51,7 +51,7 @@ public class NewsClassification {
 	    fetching(1);
 	}
 	
-	List<Integer> idCache = new ArrayList<Integer>();
+	
 	
 	Map<String,Map<String,Double>> terrorist = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> campus = new HashMap<String,Map<String,Double>>();
@@ -70,67 +70,130 @@ public class NewsClassification {
 		
 		int round = 1;
 		int count = 0;
+		String sql = null;
 		
 		do{
-		    String sql = null;
 		    if(type == 1)
 		        sql = "select idnum,all_important from violence limit " + (round - 1)*5000 + ",5000";
 		    else if(type == 2)
 		        sql = "select idnum,all_important from campus limit " + (round - 1)*5000 + ",5000";
 		    else if(type == 3)
-		        sql = "select idnum,all_important from bus limit " + (round - 1)*5000 + ",5000";
+		        sql = "select idnum,all_important from bus_explosion limit " + (round - 1)*5000 + ",5000";
 		    
 			rs = st1.executeQuery(sql);
 			
-			count = validateAndUpdate(rs,1);
+			count = validateAndUpdate(rs,type);
 			rs.close();
+			System.out.println("fetching and updating round " + round + " complete [ type " + type + " ]");
+			
 			round ++;
 		}while(count == 5000);
 		
-		//计算话题关键词平均权重
+		System.out.println("type " + type + " complete!");
+		
+		String input = "";
+		String output1 = "";
+		String output2 = "";
+		
+		Map<String,Double> aveValue = new HashMap<String,Double>();
+		double a = 0;
+		double b = 0;
+		double c = 0;
+		StringBuilder sb = new StringBuilder();
 		if(type == 1){
-		    StringBuilder sb = new StringBuilder();
+		    //计算话题关键词平均权重
 		    sb.append("暴恐话题前100个关键词平均权重: \n");
 		    String [] arr = this.terrorist.keySet().toArray(new String[0]);
-		    for(String a : arr){
-		        sb.append(a + "," + (this.terrorist.get(a).get("sum") / this.terrorist.get(a).get("times")) + "\n");
+		    for(String i : arr){
+		        sb.append(i + "," + (this.terrorist.get(i).get("sum") / this.terrorist.get(i).get("times")) + "\n");
+		        aveValue.put(i, (this.terrorist.get(i).get("sum") / this.terrorist.get(i).get("times")));
 		    }
-		    BufferedWriter bw = new BufferedWriter(new FileWriter("F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\baokong_word_top_100.csv"));
-		    bw.write(sb.toString());
-		    bw.close();
-		    
+		    input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\terrorist-tmp.csv";
+		    output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong_word_top_100.csv";
+		    output2 ="F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong-topic-cosin.csv";
 		}
 		else if(type == 2){
-		    StringBuilder sb = new StringBuilder();
             sb.append("校园砍伤话题前100个关键词平均权重: \n");
             String [] arr = this.campus.keySet().toArray(new String[0]);
-            for(String a : arr){
-                sb.append(a + "," + (this.campus.get(a).get("sum") / this.campus.get(a).get("times")) + "\n");
+            for(String i : arr){
+                sb.append(i + "," + (this.campus.get(i).get("sum") / this.campus.get(i).get("times")) + "\n");
+                aveValue.put(i, (this.campus.get(i).get("sum") / this.campus.get(i).get("times")));
             }
-            BufferedWriter bw = new BufferedWriter(new FileWriter("F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\xiaoyuan_word_top_100.csv"));
-            bw.write(sb.toString());
-            bw.close();
+            
+            input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\campus-tmp.csv";
+            output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan_word_top_100.csv";
+            output2 ="F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan-topic-cosin.csv";
 		}
 		else if(type == 3){
-		    StringBuilder sb = new StringBuilder();
             sb.append("公交爆炸话题前100个关键词平均权重: \n");
             String [] arr = this.bus.keySet().toArray(new String[0]);
-            for(String a : arr){
-                sb.append(a + "," + (this.bus.get(a).get("sum") / this.bus.get(a).get("times")) + "\n");
+            for(String i : arr){
+                sb.append(i + "," + (this.bus.get(i).get("sum") / this.bus.get(i).get("times")) + "\n");
+                aveValue.put(i, (this.bus.get(i).get("sum") / this.bus.get(i).get("times")));
             }
-            BufferedWriter bw = new BufferedWriter(new FileWriter("F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\gongjiao_word_top_100.csv"));
-            bw.write(sb.toString());
-            bw.close();
+            
+            input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\bus-tmp.csv";
+            output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao_word_top_100.csv";
+            output2 ="F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao-topic-cosin.csv";
 		}
+		
+		BufferedWriter bw = new BufferedWriter(new FileWriter(output1));
+        bw.write(sb.toString());
+        bw.close();
+        System.out.println("top 100 words of type " + type + " written to " + output1);
+        sb = null;
+        
+        //根据话题关键词平均权重计算各条新闻的余弦值
+        String [] topicKeys = aveValue.keySet().toArray(new String[0]);
+        
+        for(String s : topicKeys){
+            b += Math.pow(aveValue.get(s), 2);
+        }
+        b = Math.sqrt(b);
+        
+        BufferedReader br = new BufferedReader(new FileReader(input));
+        String l = "";
+        StringBuilder sb2 = new StringBuilder();
+        while((l = br.readLine()) != null){
+            String [] ls = l.split(",");
+            if(ls != null){
+                String [] words = ls[1].split("#");
+                if(words != null){
+                    for(String s : words){
+                        String [] items = s.split("/");
+                        if(items != null){
+                            c += Math.pow(Double.parseDouble(items[2]), 2);
+                            
+                            if(aveValue.containsKey(items[0])){
+                                a += aveValue.get(items[0]) * Double.parseDouble(items[2]);
+                            }
+                        }
+                    }
+                    c = Math.sqrt(c);
+                    double cos = a / (b * c);
+                    sb2.append(ls[0] + "," + cos + "\n");
+                    
+                }
+            }
+        }
+        br.close();
+        BufferedWriter bw2 = new BufferedWriter(new FileWriter(output2));
+        bw2.write(sb2.toString());
+        bw2.close();
+        System.out.println("cosin of type " + type + " written to " + output2);
+		sb2 = null;
+		aveValue.clear();
+		aveValue = null;
+		
 		
 		fetching(type + 1);
 	}
 	
+	
 	public int validateAndUpdate(ResultSet rs,int type) throws SQLException, IOException{
 		int counter = 0;
-		this.idCache.clear();
-		
 		if(rs != null){
+		    List<Integer> idCache = new ArrayList<Integer>();
 		    
 		    StringBuilder sb = new StringBuilder();
 		    
@@ -141,12 +204,12 @@ public class NewsClassification {
 			    String [] tmp = null;
 			    if(allImp != null){
 			        
-			    //1代表处理暴恐时间
+			    //1代表处理暴恐事件
 			        if(type == 1){
 			        
 			            if((allImp.contains("暴力") && allImp.contains("恐怖")) || (allImp.contains("暴恐"))
 			                    || (allImp.contains("暴行") && allImp.contains("恐怖"))){
-			                this.idCache.add(id);
+			                idCache.add(id);
 			                sb.append(id + "," + allImp + "\n");
 			                tmp = allImp.split("#");
 			                
@@ -178,7 +241,7 @@ public class NewsClassification {
 			        else if(type == 2){
 	                    if((allImp.contains("校园") && allImp.contains("砍伤")) || (allImp.contains("学校") && allImp.contains("砍伤"))
 	                            || (allImp.contains("学生") && allImp.contains("砍伤")) || (allImp.contains("学校内") && allImp.contains("砍伤"))){
-	                        this.idCache.add(id);
+	                        idCache.add(id);
 	                        sb.append(id + "," + allImp + "\n");
                             tmp = allImp.split("#");
                             
@@ -211,7 +274,7 @@ public class NewsClassification {
 			                    || (allImp.contains("公交") && allImp.contains("爆炸")) || (allImp.contains("公交") && allImp.contains("纵火"))
 			                    || (allImp.contains("公交车") && allImp.contains("泼油"))
 			                    || (allImp.contains("公交") && allImp.contains("泼油"))){
-			                this.idCache.add(id);
+			                idCache.add(id);
 			                
 			                sb.append(id + "," + allImp + "\n");
                             tmp = allImp.split("#");
@@ -250,18 +313,18 @@ public class NewsClassification {
             String fileName = null;
             if(type == 1){
                 sql.append("update violence set validate_tag = 1 where idnum in(");
-                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\terrorist-tmp.csv";
+                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\terrorist-tmp.csv";
             }
             else if(type == 2){
                 sql.append("update campus set validate_tag = 1 where idnum in(");
-                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\campus-tmp.csv";
+                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\campus-tmp.csv";
             }
             else if(type == 3){
-                sql.append("update bus set validate_tag = 1 where idnum in(");
-                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-20\\bus-tmp.csv";
+                sql.append("update bus_explosion set validate_tag = 1 where idnum in(");
+                fileName = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\bus-tmp.csv";
             }
             
-            for(int t : this.idCache){
+            for(int t : idCache){
                 sql.append(t + ",");
             }
             if(sql.lastIndexOf(",") == sql.length() - 1)
