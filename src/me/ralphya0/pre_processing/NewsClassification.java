@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,30 +21,15 @@ import me.ralphya0.tools.DB;
 
 public class NewsClassification {
 
-          /*  暴恐事件（3）：
-            暴力+恐怖
-            暴恐
-            暴行+恐怖
-        
-            校园砍伤事件（4）：
-            校园+砍伤
-            学校+砍伤
-            学生+砍伤
-            校园内+砍伤
-        
-            公交车爆炸事件（6）：
-            公交车+爆炸
-            公交车+纵火
-            公交+爆炸
-            公交+纵火
-            公交车+泼油
-            公交+泼油*/
-    
-
-	
-	Connection connection = null;
+    Connection connection = null;
 	Statement st1 = null;
 	Statement st2 = null;
+	
+	Map<String,Double> terrorist_keywd = new HashMap<String,Double>();
+	Map<String,Double> campus_keyewd = new HashMap<String,Double>();
+	Map<String,Double> bus_keywd = new HashMap<String,Double>();
+	Item[] items = null;
+	int arrCounter = 0;
 	
 	public NewsClassification() throws SQLException, IOException{
 	    connection = new DB().getConn();
@@ -72,6 +59,10 @@ public class NewsClassification {
         
         
 	}
+	
+	public NewsClassification(String f) throws Throwable{
+	    computingCosin();
+    }
 	
 	Map<String,Map<String,Double>> terrorist = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> campus = new HashMap<String,Map<String,Double>>();
@@ -414,7 +405,7 @@ public class NewsClassification {
 	        //if(counter < 500){
 	            String[] ll = l.split(",");
 	            
-	            if(ll != null){
+	            if(ll != null && !ll[1].equals("0.0")){
 	                String s = sql.replace("#1", ll[1]).replace("@2", ll[0]);
 	                st1.executeUpdate(s);
 	                //sb.append(s);
@@ -434,6 +425,162 @@ public class NewsClassification {
 	    System.out.println("current round complete!");
 	}
 	
+	public void computingCosin() throws Throwable{
+	    connection = new DB().getConn();
+	    st1 = connection.createStatement();
+	    st2 = connection.createStatement();
+	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\terrorist.txt";
+	    String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\campus.txt";
+	    String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\bus.txt";
+	    String sql1 = "select idnum,all_important from violence limit #1,5000";
+	    String sql2 = "select idnum,all_important from campus limit #1,5000";
+	    String sql3 = "select idnum,all_important from bus_explosion limit #1,5000";
+	    double b;
+	    
+	    b = init(this.terrorist_keywd,in1);
+	    fetchRecords(sql1,1,b);
+	    System.out.println("type 1 done!");
+	    b = init(this.campus_keyewd,in2);
+	    fetchRecords(sql2,2,b);
+	    System.out.println("type 2 done!");
+	    b = init(this.bus_keywd,in3);
+	    fetchRecords(sql3,3,b);
+	    System.out.println("type 3 done!");
+	}
+	
+	public double init(Map<String,Double> map,String in) throws Throwable, IOException{
+	    BufferedReader br = new BufferedReader(new FileReader(in));
+        String l = "";
+        double res = 0;
+        while((l = br.readLine()) != null){
+            String [] ls = l.split(" ");
+            if(ls != null){
+                double x = Double.parseDouble(ls[1]) * 30;
+                map.put(ls[0], x);
+                res += Math.pow(x, 2);
+            }
+        }
+        br.close();
+        arrCounter = 0;
+        this.items = null;
+        System.out.println("init success");
+        return Math.sqrt(res);
+	}
+	
+	public void fetchRecords(String sql,int type,double b) throws SQLException, IOException{
+	    
+	    int round = 1;
+	    int counter = 0;
+	    ResultSet rs = null;
+	    
+	    int itemNum = 0;
+	    if(type == 1){
+	        rs = st1.executeQuery("select count(*) from violence");
+	        if(rs.next()){
+	            itemNum = rs.getInt(1);
+	        }
+	    }
+	    else if(type == 2){
+            rs = st1.executeQuery("select count(*) from campus");
+            if(rs.next()){
+                itemNum = rs.getInt(1);
+            }
+        }
+	    else if(type == 3){
+            rs = st1.executeQuery("select count(*) from bus_explosion");
+            if(rs.next()){
+                itemNum = rs.getInt(1);
+            }
+        }
+	    
+	    this.items = new Item[itemNum];  
+	    
+	    do{
+	        String q = sql.replace("#1", String.valueOf((round - 1)*5000));
+	        rs = st1.executeQuery(q);
+	        
+	        counter = cosinUsingWord2vec(rs,type,b);
+	        System.out.println("round " + round);
+	        round ++;
+	    }while(counter == 5000);
+	    
+	    //排序
+	    Arrays.sort(this.items, new IComparator());
+	    StringBuilder sb = new StringBuilder();
+	    String out = "";
+	    if(type == 1){
+	        sb.append("由暴恐话题关键词计算得到的新闻cosin值: \n");
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\baokong-cosin.csv";
+	    }
+	    else if(type == 2){
+	        sb.append("由校园砍伤话题关键词计算得到的新闻cosin值: \n");
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\xiaoyuan-cosin.csv";
+	    }
+	    else if(type == 3){
+	        sb.append("由公交爆炸关键词计算得到的新闻cosin值: \n");
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\gongjiao-cosin.csv";
+	    }
+	    
+	    sb.append("\n");
+	    for(Item i : items){
+	        if(i != null)
+	            sb.append(i.id + "," + i.cosin + "\n");
+	    }
+	    
+	    BufferedWriter bw = new BufferedWriter(new FileWriter(out));
+	    bw.write(sb.toString());
+	    bw.close();
+	    System.out.println("cosin computing completed of type " + type + " ["  + out + "]");
+	}
+	
+	public int cosinUsingWord2vec(ResultSet rs,int type,double b) throws SQLException, IOException{
+	    int counter = 0;
+	    if(rs != null){
+	        Map<String,Double> worker = null;
+	        String sql = "";
+	        if(type == 1){
+	            worker = this.terrorist_keywd;
+	            sql = "update violence set cosin = #1 where idnum = @2";
+            }
+	        else if(type == 2){
+	            worker = this.campus_keyewd;
+	            sql = "update campus set cosin = #1 where idnum = @2";
+	        }
+	        else if(type == 3){
+	            worker = this.bus_keywd;
+	            sql = "update bus_explosion set cosin = #1 where idnum = @2";
+	        }
+	        while(rs.next()){
+	            counter ++;
+	            int id = rs.getInt("idnum");
+	            String allImp = rs.getString("all_important");
+	            String [] arr = allImp.split("#");
+	            if(arr != null){
+	                double a = 0;
+	                double c = 0;
+	                for(String i : arr){
+	                    String [] arr2 = i.split("/");
+	                    if(arr2 != null){
+	                        c += Math.pow(Double.parseDouble(arr2[2]), 2);
+	                        if(worker.containsKey(arr2[0])){
+	                            a += Double.parseDouble(arr2[2]) * worker.get(arr2[0]);
+	                            
+	                        }
+	                    }
+	                }
+	                c = Math.sqrt(c);
+	                double res = a / (b * c);
+	                
+	                st2.executeUpdate(sql.replace("#1", String.valueOf(res)).replace("@2", String.valueOf(id)));
+
+	                this.items[arrCounter++] = new Item(id,res);
+	            }
+	        }
+	       
+	    }
+	    return counter;
+	}
+	
 }
 class SortItem{
     String word;
@@ -446,4 +593,32 @@ class SortItem{
         next = ne;
         pre = pr;
     }
+}
+
+class Item{
+    int id;
+    double cosin;
+    public Item(int i,double c){
+        id = i;
+        cosin = c;
+    }
+}
+class IComparator implements Comparator<Item>{
+
+    @Override
+    public int compare(Item o1, Item o2) {
+        if(o1 != null && o2 != null){
+            
+            double cosina = o1.cosin;
+            double cosinb = o2.cosin;
+            if(cosina < cosinb)
+                return 1;
+            if(cosina > cosinb)
+                return -1;
+            return 0;
+        }
+        return 0;
+        
+    }
+    
 }
