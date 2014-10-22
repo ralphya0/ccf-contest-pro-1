@@ -55,9 +55,9 @@ public class NewsClassification {
 	public NewsClassification(int f) throws SQLException, IOException{
 	    connection = new DB().getConn();
         st1 = connection.createStatement();
-	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong-topic-cosin-new.csv";
-        String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan-topic-cosin-new.csv";
-        String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao-topic-cosin-new.csv";
+	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong-topic-cosin.csv";
+        String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan-topic-cosin.csv";
+        String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao-topic-cosin.csv";
         String sql1 = "update violence set cosin = #1 where idnum = @2;";
         String sql2 = "update campus set cosin = #1 where idnum = @2;";
         String sql3 = "update bus_explosion set cosin = #1 where idnum = @2;";
@@ -76,10 +76,6 @@ public class NewsClassification {
 	Map<String,Map<String,Double>> terrorist = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> campus = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> bus = new HashMap<String,Map<String,Double>>();
-	
-	int terroristWordCounter = 0;
-	int campusWordCounter = 0;
-	int busWordCounter = 0;
 
 	public void fetching(int type) throws SQLException, IOException{
 	    
@@ -124,25 +120,28 @@ public class NewsClassification {
 		
 		
 		StringBuilder sb = new StringBuilder();
+		Map<String,Map<String,Double>> worker = null;
+		String [] arr = null;
+		int wordCounter = 0;
 		if(type == 1){
 		    //计算话题关键词平均权重
+		    
 		    sb.append("暴恐话题前100个关键词平均权重: \n");
-		    String [] arr = this.terrorist.keySet().toArray(new String[0]);
-		    for(String i : arr){
-		        sb.append(i + "," + (this.terrorist.get(i).get("sum") / this.terrorist.get(i).get("times")) + "\n");
-		        aveValue.put(i, (this.terrorist.get(i).get("sum") / this.terrorist.get(i).get("times")));
-		    }
+		    sb.append("word,value \n");
+		    
+		    arr = this.terrorist.keySet().toArray(new String[0]);
+		    worker = this.terrorist;
+		    
+		    
 		    input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\terrorist-tmp.csv";
 		    output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong_word_top_100.csv";
 		    output2 ="F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\baokong-topic-cosin.csv";
 		}
 		else if(type == 2){
             sb.append("校园砍伤话题前100个关键词平均权重: \n");
-            String [] arr = this.campus.keySet().toArray(new String[0]);
-            for(String i : arr){
-                sb.append(i + "," + (this.campus.get(i).get("sum") / this.campus.get(i).get("times")) + "\n");
-                aveValue.put(i, (this.campus.get(i).get("sum") / this.campus.get(i).get("times")));
-            }
+            sb.append("word,value \n");
+            arr = this.campus.keySet().toArray(new String[0]);
+            worker = this.campus;
             
             input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\campus-tmp.csv";
             output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\xiaoyuan_word_top_100.csv";
@@ -150,16 +149,55 @@ public class NewsClassification {
 		}
 		else if(type == 3){
             sb.append("公交爆炸话题前100个关键词平均权重: \n");
-            String [] arr = this.bus.keySet().toArray(new String[0]);
-            for(String i : arr){
-                sb.append(i + "," + (this.bus.get(i).get("sum") / this.bus.get(i).get("times")) + "\n");
-                aveValue.put(i, (this.bus.get(i).get("sum") / this.bus.get(i).get("times")));
-            }
+            sb.append("word,value \n");
+            arr = this.bus.keySet().toArray(new String[0]);
+            worker = this.bus;
             
             input = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\bus-tmp.csv";
             output1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao_word_top_100.csv";
             output2 ="F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-21\\gongjiao-topic-cosin.csv";
 		}
+		
+		//平均权值最大的100个关键词链表
+        //从小到大排序
+        SortItem list = new SortItem(null,0.1,null,null);
+        SortItem tail = list;
+        
+        for(String i : arr){
+            double value = worker.get(i).get("sum") / worker.get(i).get("times");
+            SortItem pt = list;
+            while(pt.next != null && pt.next.val < value){
+                pt = pt.next;
+            }
+            if(wordCounter == 100 && pt == list){
+                //ignore
+                continue;
+            }
+            else{
+                    SortItem item = new SortItem(i,value,pt.next,pt);
+                    if(pt.next != null)
+                        pt.next.pre = item;
+                    pt.next = item;
+                    if(item.next == null)
+                        tail = item;
+                    if(wordCounter < 100)
+                        wordCounter ++;
+                    else {
+                        list.next.next.pre = list;
+                        list.next = list.next.next;
+                        
+                    }
+            }
+
+        }
+        
+        SortItem iter = tail;
+        while(iter != null && iter != list){
+            sb.append(iter.word + "," + iter.val + "\n");
+            aveValue.put(iter.word, iter.val);
+            iter = iter.pre;
+        }
+		
 		
 		BufferedWriter bw = new BufferedWriter(new FileWriter(output1));
         bw.write(sb.toString());
@@ -243,22 +281,20 @@ public class NewsClassification {
 			                if(tmp != null){
 			                    for(String s : tmp){
 			                        String [] tmp2 = s.split("/");
-			                        if(tmp2 != null){
-			                            if(!this.terrorist.containsKey(tmp2[0]) && this.terroristWordCounter < 100){
+			                        if(tmp2 != null && !tmp2[1].equals("ns")&& !tmp2[1].equals("nsf") && !tmp2[1].equals("nr")
+			                                && !tmp2[1].equals("nr1") && !tmp2[1].equals("nr2") && !tmp2[1].equals("nrj") 
+			                                && !tmp2[1].equals("nrf")){
+			                            if(!this.terrorist.containsKey(tmp2[0])){
 			                                Map<String,Double> mm = new HashMap<String,Double>();
 			                                mm.put("times", (double)1);
 			                                mm.put("sum", Double.parseDouble(tmp2[2]));
 			                                this.terrorist.put(tmp2[0], mm);
-			                                this.terroristWordCounter ++;
 			                            }
-			                            else if(this.terrorist.containsKey(tmp2[0])){
+			                            else{
 			                                terrorist.get(tmp2[0]).put("sum",terrorist.get(tmp2[0]).get("sum") + Double.parseDouble(tmp2[2]));
 			                                terrorist.get(tmp2[0]).put("times",terrorist.get(tmp2[0]).get("times") + 1);
 			                            }
-			                            else{
-			                                //ignore
-			                            }
-			                             
+
 			                        }
 			                    }
 			                }
@@ -275,20 +311,18 @@ public class NewsClassification {
                             if(tmp != null){
                                 for(String s : tmp){
                                     String [] tmp2 = s.split("/");
-                                    if(tmp2 != null){
-                                        if(!this.campus.containsKey(tmp2[0]) && this.campusWordCounter < 100){
+                                    if(tmp2 != null && !tmp2[1].equals("ns")&& !tmp2[1].equals("nsf") && !tmp2[1].equals("nr")
+                                            && !tmp2[1].equals("nr1") && !tmp2[1].equals("nr2") && !tmp2[1].equals("nrj") 
+                                            && !tmp2[1].equals("nrf")){
+                                        if(!this.campus.containsKey(tmp2[0])){
                                             Map<String,Double> mm = new HashMap<String,Double>();
                                             mm.put("times", (double)1);
                                             mm.put("sum", Double.parseDouble(tmp2[2]));
                                             this.campus.put(tmp2[0], mm);
-                                            this.campusWordCounter ++;
-                                        }
-                                        else if(this.campus.containsKey(tmp2[0])){
-                                            campus.get(tmp2[0]).put("sum",campus.get(tmp2[0]).get("sum") + Double.parseDouble(tmp2[2]));
-                                            campus.get(tmp2[0]).put("times",campus.get(tmp2[0]).get("times") + 1);
                                         }
                                         else{
-                                            //ignore
+                                            campus.get(tmp2[0]).put("sum",campus.get(tmp2[0]).get("sum") + Double.parseDouble(tmp2[2]));
+                                            campus.get(tmp2[0]).put("times",campus.get(tmp2[0]).get("times") + 1);
                                         }
                                          
                                     }
@@ -309,21 +343,20 @@ public class NewsClassification {
                             if(tmp != null){
                                 for(String s : tmp){
                                     String [] tmp2 = s.split("/");
-                                    if(tmp2 != null){
-                                        if(!this.bus.containsKey(tmp2[0]) && this.busWordCounter < 100){
+                                    if(tmp2 != null && !tmp2[1].equals("ns")&& !tmp2[1].equals("nsf") && !tmp2[1].equals("nr")
+                                            && !tmp2[1].equals("nr1") && !tmp2[1].equals("nr2") && !tmp2[1].equals("nrj") 
+                                            && !tmp2[1].equals("nrf")){
+                                        if(!this.bus.containsKey(tmp2[0])){
                                             Map<String,Double> mm = new HashMap<String,Double>();
                                             mm.put("times", (double)1);
                                             mm.put("sum", Double.parseDouble(tmp2[2]));
                                             this.bus.put(tmp2[0], mm);
-                                            this.busWordCounter ++;
                                         }
-                                        else if(this.bus.containsKey(tmp2[0])){
+                                        else{
                                             bus.get(tmp2[0]).put("sum",bus.get(tmp2[0]).get("sum") + Double.parseDouble(tmp2[2]));
                                             bus.get(tmp2[0]).put("times",bus.get(tmp2[0]).get("times") + 1);
                                         }
-                                        else{
-                                            //ignore
-                                        }
+
                                          
                                     }
                                 }
@@ -400,4 +433,17 @@ public class NewsClassification {
 	    br.close();
 	    System.out.println("current round complete!");
 	}
+	
+}
+class SortItem{
+    String word;
+    double val;
+    SortItem next;
+    SortItem pre;
+    public SortItem(String wd,double co,SortItem ne,SortItem pr){
+        word = wd;
+        val = co;
+        next = ne;
+        pre = pr;
+    }
 }
