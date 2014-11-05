@@ -24,9 +24,11 @@ public class AggregateByDate {
     List<String> dates = null;
     List<Double> relative_values = null; 
     Connection connection = null;
+    Statement st = null;
     //将新闻按照时间归类(同时以固定阈值对cosin值进行过滤)
     public AggregateByDate() throws SQLException, IOException{
         connection = new DB().getConn();
+        st = connection.createStatement();
         newsAggregation();
     }
     
@@ -52,7 +54,9 @@ public class AggregateByDate {
         filter(sql2,sql5,update2);
         init(in3);
         filter(sql3,sql6,update3);
+        st.close();
         connection.close();
+        System.out.println("done");
     }
     public void init(String input) throws IOException{
         if(dates == null)
@@ -80,7 +84,7 @@ public class AggregateByDate {
     
     //数据表中日期字段是？需要写入的相关值字段叫啥？新表名？
     public void filter(String query,String sql2,String update) throws SQLException{
-        Statement st = connection.createStatement();
+        
         ResultSet rs = null;
         int ct = 0;
         for(String date : dates){
@@ -97,44 +101,76 @@ public class AggregateByDate {
                 counter ++;
                 int id = rs.getInt("idnum");
                 String people = rs.getString("person");
-                String localtion = rs.getString("location");
+                String location = rs.getString("location");
                 String time = rs.getString("first_time");
                 String time_tag = rs.getString("time_tag");
                 double cosin = rs.getDouble("cosin");
+                
+                //分割字段
+                if(people != null && people.trim().length() > 0){
+                    String [] arr_people = people.split(" ");
+                    if(arr_people != null){
+                        for(String p : arr_people){
+                            if(p != null && p.trim().length() > 0)
+                                if(!peopleCache.containsKey(p)){
+                                    peopleCache.put(p, 1);
+                                }
+                                else{
+                                    peopleCache.put(p, peopleCache.get(p) + 1);
+                                }
+                        }
+                    }
+                }
+                
+                if(location != null && location.trim().length() > 0 ){
+                    String [] arr_location = location.split("#");
+                    if(arr_location != null){
+                        for(String l : arr_location){
+                            if(l != null && l.trim().length() > 0) 
+                                if(!locationCache.containsKey(l))
+                                    locationCache.put(l, 1);
+                                else
+                                    locationCache.put(l, locationCache.get(l) + 1);
+                        }
+                    }
+                }
+                
+                if(time != null && time.trim().length() > 0 ){
+                    String [] arr_time = time.split(" ");
+                    if(arr_time != null){
+                        for(String t : arr_time){
+                            if(t != null && t.trim().length() > 0)
+                                if(!timeCache.containsKey(t))
+                                    timeCache.put(t, 1);
+                                else
+                                    timeCache.put(t, timeCache.get(t) + 1);
+                        }
+                    }
+                }
+                
+                if(time_tag != null && time_tag.trim().length() > 0){
+                    String [] arr_tag = time_tag.split(" ");
+                    for(String t : arr_tag){
+                        if(t != null && t.trim().length() > 0)
+                            if(!tagCache.containsKey(t))
+                                tagCache.put(t, 1);
+                            else
+                                tagCache.put(t, tagCache.get(t) + 1);
+                    }
+                }
+                
                 if(cosin > max_cosin){
                     max_cosin = cosin;
                     max_cosin_idnum = id;
                 }
-                
-                if(!peopleCache.containsKey(people)){
-                    peopleCache.put(people, 1);
-                }
-                else{
-                    peopleCache.put(people, peopleCache.get(people) + 1);
-                }
-                
-                if(!locationCache.containsKey(localtion))
-                    locationCache.put(localtion, 1);
-                else
-                    locationCache.put(localtion, locationCache.get(localtion) + 1);
-                
-                if(!timeCache.containsKey(time))
-                    timeCache.put(time, 1);
-                else
-                    timeCache.put(time, timeCache.get(time) + 1);
-                
-                if(!tagCache.containsKey(time_tag))
-                    tagCache.put(time_tag, 1);
-                else
-                    tagCache.put(time_tag, tagCache.get(time_tag) + 1);
-                
+
             }
             
             //对缓存内容排序并截取结果的前x条
-            String people_field = sort(peopleCache,counter,3);
-            String location_field = sort(locationCache,counter,3);
-            String time_field = sort(timeCache,counter,1);
-            String tag_field = sort(tagCache,counter,1);
+            String people_field = sort(peopleCache,counter / 12,3," ");
+            String location_field = sort(locationCache,counter / 12,3,"#");
+            String time_field = sort(timeCache,counter / 10,1," ");
+            String tag_field = sort(tagCache,counter / 15,1," ");
             double val_field = relative_values.get(ct);
             ct ++;
             //提取最大cosin新闻的其他字段内容
@@ -182,11 +218,10 @@ public class AggregateByDate {
             }
             
         }
-        st.close();
+        System.out.println("已处理完一个主题");
     }
     
-    public String sort(Map<String,Integer> map,int counter,int holdnum){
-            int threshold = counter / 5;
+    public String sort(Map<String,Integer> map,int threshold,int holdnum,String spliter){
             String [] top_items = new String[holdnum];
             int [] top_values = new int[holdnum];
             StringBuilder statement = new StringBuilder();
@@ -217,8 +252,10 @@ public class AggregateByDate {
             }
             if(number_of_current_topic > 0){
                 for(int i = 0;i < Math.min(holdnum, number_of_current_topic); i ++){
-                    statement.append(top_items[i] + "/" + top_values[i] + "#");
+                    statement.append(top_items[i] + spliter);
                 }
+                if(statement.lastIndexOf(spliter) == statement.length() - 1)
+                    statement.deleteCharAt(statement.length() - 1);
                 return statement.toString();
             }
             return "";
