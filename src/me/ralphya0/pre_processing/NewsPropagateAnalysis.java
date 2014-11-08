@@ -58,10 +58,11 @@ public class NewsPropagateAnalysis {
         List<String> l1 = new ArrayList<String>();
         List<String> l2 = new ArrayList<String>();
         List<String> l3 = new ArrayList<String>();
+        List<String> l4 = new ArrayList<String>();
         userType.put(1, l1);
         userType.put(2, l2);
         userType.put(3, l3);
-        
+        userType.put(4, l4);
         String in = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-7\\两步聚类结果.csv";
         BufferedReader br = new BufferedReader(new FileReader(in));
         br.readLine();
@@ -70,6 +71,9 @@ public class NewsPropagateAnalysis {
             String [] arr = l.split(",");
             if(arr != null && !arr[arr.length - 1].equals("$null$")){
                 userType.get(Integer.parseInt(arr[arr.length - 1])).add(arr[0]);
+            }
+            else if(arr[arr.length - 1].equals("$null$")){
+                userType.get(4).add(arr[0]);
             }
         }
         br.close();
@@ -144,6 +148,7 @@ public class NewsPropagateAnalysis {
                     mm.put("user_type_1", 0);
                     mm.put("user_type_2", 0);
                     mm.put("user_type_3", 0);
+                    mm.put("user_type_null", 0);
                     mm.put("comment_count", 0);
                     mm.put("quote_count", 0);
                     mm.put("attitudes_count", 0);
@@ -184,6 +189,9 @@ public class NewsPropagateAnalysis {
                         }
                         else if(userType.get(3).contains(String.valueOf(siteurl_crc))){
                             cache.get(month).put("user_type_3", cache.get(month).get("user_type_3") + 1);
+                        }
+                        else if(userType.get(4).contains(String.valueOf(siteurl_crc))){
+                            cache.get(month).put("user_type_null", cache.get(month).get("user_type_null") + 1);
                         }
                         
                         ResultSet rs3 = null ;
@@ -256,14 +264,15 @@ public class NewsPropagateAnalysis {
             
             //写入数据表和文件
             StringBuilder sb = new StringBuilder();
-            sb.append("month,type_count,media_count,web_count,news_count,user_num,trans_count,user_type,comment_count,quote_count,"
+            sb.append("month,type_count,media_count,web_count,news_count,user_num,trans_count,user_type_1,user_type_2,user_type_3,user_type_null,comment_count,quote_count,"
                     + "attitudes_count,inter_time \n");
             
             for(String s : arr_tmp){
-                String utype = "type-1:" + cache.get(s).get("user_type_1") + "#type-2:" + cache.get(s).get("user_type_2") + "#type-3:" + cache.get(s).get("user_type_3");
+                //String utype = "type-1:" + cache.get(s).get("user_type_1") + "#type-2:" + cache.get(s).get("user_type_2") + "#type-3:" + cache.get(s).get("user_type_3");
                 sb.append(s + "," + cache.get(s).get("type_count") + "," + cache.get(s).get("media_count") + "," + cache.get(s).get("web_count")
                         + "," + cache.get(s).get("news_count") + "," + cache.get(s).get("user_num") + "," + cache.get(s).get("trans_count")
-                        + "," +  utype + "," + cache.get(s).get("comment_count") + "," + cache.get(s).get("quote_count") + ","
+                        + "," +  cache.get(s).get("user_type_1") + "," + cache.get(s).get("user_type_2") + "," + cache.get(s).get("user_type_3") + ","
+                        + cache.get(s).get("user_type_null") + "," + cache.get(s).get("comment_count") + "," + cache.get(s).get("quote_count") + ","
                         + cache.get(s).get("attitudes_count") + "," + cache.get(s).get("inter_time") + "\n");
                 
             }
