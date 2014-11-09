@@ -429,12 +429,12 @@ public class NewsClassification {
 	    connection = new DB().getConn();
 	    st1 = connection.createStatement();
 	    st2 = connection.createStatement();
-	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\terrorist.txt";
-	    String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\campus.txt";
-	    String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\topic-keywords\\bus.txt";
+	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\violence.txt";
+	    String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\campus.txt";
+	    String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\bus.txt";
 	    String sql1 = "select idnum,all_important from violence limit #1,5000";
 	    String sql2 = "select idnum,all_important from campus limit #1,5000";
-	    String sql3 = "select idnum,all_important from bus_explosion limit #1,5000";
+	    String sql3 = "select idnum,all_important from bus limit #1,5000";
 	    double b;
 	    
 	    b = init(this.terrorist_keywd,in1);
@@ -487,7 +487,7 @@ public class NewsClassification {
             }
         }
 	    else if(type == 3){
-            rs = st1.executeQuery("select count(*) from bus_explosion");
+            rs = st1.executeQuery("select count(*) from bus");
             if(rs.next()){
                 itemNum = rs.getInt(1);
             }
@@ -510,15 +510,15 @@ public class NewsClassification {
 	    String out = "";
 	    if(type == 1){
 	        sb.append("由暴恐话题关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\baokong-cosin.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\violence-cosin-new.csv";
 	    }
 	    else if(type == 2){
 	        sb.append("由校园砍伤话题关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\xiaoyuan-cosin.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\campus-cosin-new.csv";
 	    }
 	    else if(type == 3){
 	        sb.append("由公交爆炸关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-10-22\\gongjiao-cosin.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\bus-cosin-new.csv";
 	    }
 	    
 	    sb.append("\n");
@@ -548,7 +548,7 @@ public class NewsClassification {
 	        }
 	        else if(type == 3){
 	            worker = this.bus_keywd;
-	            sql = "update bus_explosion set cosin = #1 where idnum = @2";
+	            sql = "update bus set cosin = #1 where idnum = @2";
 	        }
 	        while(rs.next()){
 	            counter ++;
@@ -581,6 +581,9 @@ public class NewsClassification {
 	    return counter;
 	}
 	
+	public static void main(String[] args) throws Throwable {
+        new NewsClassification("run");
+    }
 }
 class SortItem{
     String word;

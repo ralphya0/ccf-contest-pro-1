@@ -17,32 +17,49 @@ public class ScoreComputing {
     Statement ps = null;
     Statement ps2 = null;
     
-    
-    public void fetching() throws SQLException{
+    public void run() throws SQLException{
         connection = new DB().getConn();
         ps = connection.createStatement();
         ps2 = connection.createStatement();
+        fetching(1);
+        System.out.println("一个话题处理结束");
+        fetching(2);
+        System.out.println("一个话题处理结束");
+        fetching(3);
+        System.out.println("一个话题处理结束");
+        ps.close();
+        ps2.close();
+        connection.close();
+        System.out.println("Done!");
+    }
+    public void fetching(int type) throws SQLException{
+        
         ResultSet rs = null;
         int round = 1;
         int items = 0;
         do{
-            
-            String sql = "select idnum,title_important,abs_important,content_important from t_lable_group_comp"
+            String sql = "";
+            if(type == 1)
+                sql = "select idnum,title_important,abs_important,content_important from violence"
                     + " limit " + (round - 1)*500 + ",500";
+            else if(type == 2)
+                sql = "select idnum,title_important,abs_important,content_important from campus"
+                        + " limit " + (round - 1)*500 + ",500";
+            else if(type == 3)
+                sql = "select idnum,title_important,abs_important,content_important from bus"
+                        + " limit " + (round - 1)*500 + ",500";
             
             rs = ps.executeQuery(sql);
-            items = computingAndUpdating(rs);
+            items = computingAndUpdating(rs,type);
             round ++;
             System.out.println("round " + round);
         }while(items == 500);
-        System.out.println("Done!");
+        
         rs.close();
-        ps.close();
-        ps2.close();
-        connection.close();
+        
     }
     
-    public int computingAndUpdating(ResultSet rs) throws SQLException{
+    public int computingAndUpdating(ResultSet rs,int type) throws SQLException{
         int counter = 0;
         
         
@@ -121,7 +138,12 @@ public class ScoreComputing {
                 }
                 
                 StringBuilder us = new StringBuilder();
-                us.append("update t_lable_group_comp set all_important = '");
+                if(type == 1)
+                    us.append("update violence set all_important = '");
+                else if(type ==2)
+                    us.append("update campus set all_important = '");
+                else if(type ==3)
+                    us.append("update bus set all_important = '");
                 
                 String [] keys = scores.keySet().toArray(new String[0]);
                 
@@ -135,12 +157,16 @@ public class ScoreComputing {
                 
                 scores.clear();
                 pro.clear();
-                ps2.executeQuery(us.toString());
+                ps2.executeUpdate(us.toString());
                 us = null;
             }
             
             
         }
         return counter;
+    }
+    
+    public static void main(String[] args) throws SQLException {
+        new ScoreComputing().run();
     }
 }
