@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+//为了对用户进行聚类处理，从user表中提取出目标字段
 public class FieldsExtraction {
 
     long counter;
@@ -90,7 +91,7 @@ public class FieldsExtraction {
         if(rs != null ){
             while(rs.next()){
                 counter ++;
-                
+                //拼接所需的输出信息
                 if(rs.getBigDecimal("url_crc") != null){
                     sb.append(rs.getBigDecimal("url_crc") + ",");
                 }
@@ -198,6 +199,7 @@ public class FieldsExtraction {
             }
             
             try {
+                //输出提取的字段
                 writer = new BufferedWriter(new FileWriter(path,true));
                 writer.write(sb.toString());
             } catch (IOException e) {

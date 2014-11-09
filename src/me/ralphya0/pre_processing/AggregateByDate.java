@@ -21,6 +21,7 @@ import java.util.Map;
 
 import me.ralphya0.tools.DB;
 
+//将同一话题下的新闻按照发布时间归类（以一定cosin阈值进行筛选），并且提炼出人物、时间、地点信息
 public class AggregateByDate {
 
     List<String> dates = null;
@@ -64,6 +65,8 @@ public class AggregateByDate {
         connection.close();
         System.out.println("done");
     }
+    
+    //初始化
     public void init(String input) throws IOException{
         if(dates == null)
             dates = new ArrayList<String>();
@@ -88,7 +91,6 @@ public class AggregateByDate {
         br.close();
     }
     
-    //数据表中日期字段是？需要写入的相关值字段叫啥？新表名？
     public void filter(String query,String sql2,String update,String update2) throws SQLException{
         Map<String,Integer> peopleCache = new HashMap<String,Integer>();
         Map<String,Integer> locationCache = new HashMap<String,Integer>();
@@ -107,9 +109,6 @@ public class AggregateByDate {
             int counter = 0;
             int max_cosin_idnum = -1;
             double max_cosin = -1;
-            
-            
-            
             
             //分别统计人物、地点、时间戳到出现次数，为后续处理做准备
             while(rs.next()){

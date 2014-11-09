@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import me.ralphya0.tools.DB;
 
+//根据分词处理后的title_important、abs_important和content_important字段生成新闻的all_important字段
 public class ScoreComputing {
 
     Connection connection = null;
@@ -65,6 +66,7 @@ public class ScoreComputing {
         
         if(rs != null){
             while(rs.next()){
+                //提取相关字段
                 int id = rs.getInt("idnum");
                 String title = rs.getString("title_important");
                 String abs = rs.getString("abs_important");
@@ -76,6 +78,7 @@ public class ScoreComputing {
                 String [] abs_group = null;
                 String [] content_group = null;
                 
+                //分解字段
                 if(title != null && title.trim().length() > 0)
                     title_group = title.split("#");
                 if(abs != null && abs.trim().length() > 0)
@@ -83,6 +86,7 @@ public class ScoreComputing {
                 if(content != null && content.trim().length() > 0 )
                     content_group = content.split("#");
                 
+                //生成all_important所需的缓存
                 Map<String,Double> scores = new HashMap<String,Double>();
                 Map<String,String> pro = new HashMap<String,String>();
                 
@@ -93,7 +97,7 @@ public class ScoreComputing {
                             String [] title_group_items = l.split("/");
                             if(title_group_items != null && title_group_items[0] != null && title_group_items[2] != null
                                     && !title_group_items[0].equals(" ")){
-                                
+                                //title关键词的权重为5
                                 scores.put(title_group_items[0], Double.parseDouble(title_group_items[2]) * 5);
                                 pro.put(title_group_items[0], title_group_items[1]);
                             }
@@ -112,7 +116,7 @@ public class ScoreComputing {
                                     scores.put(abs_group_items[0], (double) 0);
                                     pro.put(abs_group_items[0], abs_group_items[1]);
                                 }
-                                
+                              //abs关键词的权重为3
                                 scores.put(abs_group_items[0], scores.get(abs_group_items[0]) + Double.parseDouble(abs_group_items[2]) * 3);
                                 
                             }
@@ -129,7 +133,7 @@ public class ScoreComputing {
                                     scores.put(content_group_items[0], (double)0);
                                     pro.put(content_group_items[0],content_group_items[1]);
                                 }
-                                
+                              //content关键词的权重为1
                                 scores.put(content_group_items[0], scores.get(content_group_items[0]) + Double.parseDouble(content_group_items[2]));
                                 
                             }
@@ -157,6 +161,7 @@ public class ScoreComputing {
                 
                 scores.clear();
                 pro.clear();
+                //将all_important字段写入数据库
                 ps2.executeUpdate(us.toString());
                 us = null;
             }

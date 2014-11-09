@@ -19,18 +19,21 @@ import java.util.Map;
 
 import me.ralphya0.tools.DB;
 
+//根据新闻的all_important字段计算其cosin相似度（针对所属主题）
 public class NewsClassification {
 
     Connection connection = null;
 	Statement st1 = null;
 	Statement st2 = null;
-	
+	//三种主题的关键词缓存
 	Map<String,Double> terrorist_keywd = new HashMap<String,Double>();
 	Map<String,Double> campus_keyewd = new HashMap<String,Double>();
 	Map<String,Double> bus_keywd = new HashMap<String,Double>();
+	
 	Item[] items = null;
 	int arrCounter = 0;
 	
+	//计算余弦相似度（不借助手动筛选出的话题关键词表）
 	public NewsClassification() throws SQLException, IOException{
 	    connection = new DB().getConn();
 	    st1 = connection.createStatement();
@@ -39,6 +42,7 @@ public class NewsClassification {
 	    fetching(1);
 	}
 	
+	//把计算得到的余弦相似度写入数据表（后期加入的独立功能）
 	public NewsClassification(int f) throws SQLException, IOException{
 	    connection = new DB().getConn();
         st1 = connection.createStatement();
@@ -60,16 +64,18 @@ public class NewsClassification {
         
 	}
 	
+	//根据手动筛选的话题关键词重新计算新闻的余弦相似度值
 	public NewsClassification(String f) throws Throwable{
 	    computingCosin();
     }
+	
 	
 	Map<String,Map<String,Double>> terrorist = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> campus = new HashMap<String,Map<String,Double>>();
 	Map<String,Map<String,Double>> bus = new HashMap<String,Map<String,Double>>();
 
 	public void fetching(int type) throws SQLException, IOException{
-	    
+	    //分别处理三种事件类型：暴恐、校园砍伤和公交爆炸
 	    if(type > 3){
 	        st1.close();
 	        st2.close();
@@ -245,7 +251,7 @@ public class NewsClassification {
 		fetching(type + 1);
 	}
 	
-	
+	//处理新闻的all_important字段
 	public int validateAndUpdate(ResultSet rs,int type) throws SQLException, IOException{
 		int counter = 0;
 		if(rs != null){
@@ -262,7 +268,7 @@ public class NewsClassification {
 			        
 			    //1代表处理暴恐事件
 			        if(type == 1){
-			        
+			            //只保留具有以下key word的新闻，其他新闻都被忽略
 			            if((allImp.contains("暴力") && allImp.contains("恐怖")) || (allImp.contains("暴恐"))
 			                    || (allImp.contains("暴行") && allImp.contains("恐怖"))){
 			                idCache.add(id);
@@ -282,6 +288,7 @@ public class NewsClassification {
 			                                this.terrorist.put(tmp2[0], mm);
 			                            }
 			                            else{
+			                                //对每个关键词统计其权值之和以及出现次数，以便求出平均权值
 			                                terrorist.get(tmp2[0]).put("sum",terrorist.get(tmp2[0]).get("sum") + Double.parseDouble(tmp2[2]));
 			                                terrorist.get(tmp2[0]).put("times",terrorist.get(tmp2[0]).get("times") + 1);
 			                            }
@@ -425,6 +432,7 @@ public class NewsClassification {
 	    System.out.println("current round complete!");
 	}
 	
+	//根据手动筛选的关键词表重新计算余弦相似度
 	public void computingCosin() throws Throwable{
 	    connection = new DB().getConn();
 	    st1 = connection.createStatement();
@@ -448,6 +456,7 @@ public class NewsClassification {
 	    System.out.println("type 3 done!");
 	}
 	
+	//读取话题关键词文件，并放入缓存
 	public double init(Map<String,Double> map,String in) throws Throwable, IOException{
 	    BufferedReader br = new BufferedReader(new FileReader(in));
         String l = "";
@@ -467,6 +476,7 @@ public class NewsClassification {
         return Math.sqrt(res);
 	}
 	
+	//计算各话题的余弦相似度
 	public void fetchRecords(String sql,int type,double b) throws SQLException, IOException{
 	    
 	    int round = 1;
@@ -493,6 +503,7 @@ public class NewsClassification {
             }
         }
 	    
+	    //该数组是为了便于根据cosin值进行排序
 	    this.items = new Item[itemNum];  
 	    
 	    do{
@@ -521,6 +532,7 @@ public class NewsClassification {
 	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\bus-cosin-new.csv";
 	    }
 	    
+	    //输出计算结果
 	    sb.append("\n");
 	    for(Item i : items){
 	        if(i != null)
@@ -552,6 +564,7 @@ public class NewsClassification {
 	        }
 	        while(rs.next()){
 	            counter ++;
+	            //提取相关字段
 	            int id = rs.getInt("idnum");
 	            String allImp = rs.getString("all_important");
 	            String [] arr = allImp.split("#");
@@ -569,8 +582,9 @@ public class NewsClassification {
 	                    }
 	                }
 	                c = Math.sqrt(c);
+	                //计算余弦相似度
 	                double res = a / (b * c);
-	                
+	                //写入数据表
 	                st2.executeUpdate(sql.replace("#1", String.valueOf(res)).replace("@2", String.valueOf(id)));
 
 	                this.items[arrCounter++] = new Item(id,res);

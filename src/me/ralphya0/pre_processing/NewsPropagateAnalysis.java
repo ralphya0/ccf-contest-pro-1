@@ -50,9 +50,9 @@ public class NewsPropagateAnalysis {
         String sql23 = "insert into xxx2 values(";
         String sql33 = "insert into xxx3 values(";
         
-        String out1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-8\\violence_huizong.csv";
-        String out2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-8\\campus_huizong.csv";
-        String out3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-8\\bus_huizong.csv";
+        String out1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\huizong\\violence_huizong.csv";
+        String out2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\huizong\\campus_huizong.csv";
+        String out3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\huizong\\bus_huizong.csv";
         
         //读取用户聚类文件
         List<String> l1 = new ArrayList<String>();
@@ -148,7 +148,9 @@ public class NewsPropagateAnalysis {
                     mm.put("user_type_1", 0);
                     mm.put("user_type_2", 0);
                     mm.put("user_type_3", 0);
-                    mm.put("user_type_null", 0);
+                    //离群值与资讯新闻传播数分离
+                    mm.put("user_type_9", 0);
+                    mm.put("user_type_0", 0);
                     mm.put("comment_count", 0);
                     mm.put("quote_count", 0);
                     mm.put("attitudes_count", 0);
@@ -178,6 +180,7 @@ public class NewsPropagateAnalysis {
                     if(source_type == 0){
                         //新闻出现次数
                         cache.get(month).put("news_count", cache.get(month).get("news_count") + 1);
+                        cache.get(month).put("user_type_0", cache.get(month).get("user_type_0") + 1);
                     }
                     else if(source_type == 4){
                         //统计用户类型
@@ -191,7 +194,7 @@ public class NewsPropagateAnalysis {
                             cache.get(month).put("user_type_3", cache.get(month).get("user_type_3") + 1);
                         }
                         else if(userType.get(4).contains(String.valueOf(siteurl_crc))){
-                            cache.get(month).put("user_type_null", cache.get(month).get("user_type_null") + 1);
+                            cache.get(month).put("user_type_9", cache.get(month).get("user_type_9") + 1);
                         }
                         
                         ResultSet rs3 = null ;
@@ -264,7 +267,7 @@ public class NewsPropagateAnalysis {
             
             //写入数据表和文件
             StringBuilder sb = new StringBuilder();
-            sb.append("month,type_count,media_count,web_count,news_count,user_num,trans_count,user_type_1,user_type_2,user_type_3,user_type_null,comment_count,quote_count,"
+            sb.append("month,type_count,media_count,web_count,news_count,user_num,trans_count,user_type_1,user_type_2,user_type_3,user_type_9,user_type_0,comment_count,quote_count,"
                     + "attitudes_count,inter_time \n");
             
             for(String s : arr_tmp){
@@ -272,8 +275,9 @@ public class NewsPropagateAnalysis {
                 sb.append(s + "," + cache.get(s).get("type_count") + "," + cache.get(s).get("media_count") + "," + cache.get(s).get("web_count")
                         + "," + cache.get(s).get("news_count") + "," + cache.get(s).get("user_num") + "," + cache.get(s).get("trans_count")
                         + "," +  cache.get(s).get("user_type_1") + "," + cache.get(s).get("user_type_2") + "," + cache.get(s).get("user_type_3") + ","
-                        + cache.get(s).get("user_type_null") + "," + cache.get(s).get("comment_count") + "," + cache.get(s).get("quote_count") + ","
+                        + cache.get(s).get("user_type_9") + "," + cache.get(s).get("user_type_0") + "," + cache.get(s).get("comment_count") + "," + cache.get(s).get("quote_count") + ","
                         + cache.get(s).get("attitudes_count") + "," + cache.get(s).get("inter_time") + "\n");
+                
                 
             }
             BufferedWriter bw = new BufferedWriter(new FileWriter(output));
