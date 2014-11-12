@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.ralphya0.tools.DB;
+
 
 //根据新闻的all_important字段计算其cosin相似度（针对所属主题）
 public class NewsClassification {
@@ -437,9 +439,9 @@ public class NewsClassification {
 	    connection = new DB().getConn();
 	    st1 = connection.createStatement();
 	    st2 = connection.createStatement();
-	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\violence.txt";
-	    String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\campus.txt";
-	    String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\new_keywords\\bus.txt";
+	    String in1 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\new_keywords\\violence.txt";
+	    String in2 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\new_keywords\\campus.txt";
+	    String in3 = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\new_keywords\\bus.txt";
 	    String sql1 = "select idnum,all_important from violence limit #1,5000";
 	    String sql2 = "select idnum,all_important from campus limit #1,5000";
 	    String sql3 = "select idnum,all_important from bus limit #1,5000";
@@ -521,15 +523,15 @@ public class NewsClassification {
 	    String out = "";
 	    if(type == 1){
 	        sb.append("由暴恐话题关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\violence-cosin-new.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\violence-cosin-new.csv";
 	    }
 	    else if(type == 2){
 	        sb.append("由校园砍伤话题关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\campus-cosin-new.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\campus-cosin-new.csv";
 	    }
 	    else if(type == 3){
 	        sb.append("由公交爆炸关键词计算得到的新闻cosin值: \n");
-	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-9\\bus-cosin-new.csv";
+	        out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-10\\bus-cosin-new.csv";
 	    }
 	    
 	    //输出计算结果

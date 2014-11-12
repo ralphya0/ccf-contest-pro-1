@@ -1,6 +1,7 @@
 package me.ralphya0.pre_processing;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import me.ralphya0.tools.DB;
+
 
 //根据分词处理后的title_important、abs_important和content_important字段生成新闻的all_important字段
 public class ScoreComputing {
