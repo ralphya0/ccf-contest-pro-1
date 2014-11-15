@@ -402,15 +402,32 @@ public class NewsCorrelative {
         int weibo2 = cache.get(2013).get(7).get("weibo") + cache.get(2013).get(6).get("weibo") + cache.get(2013).get(5).get("weibo");
         int renmin2 = cache.get(2013).get(7).get("renmin") + cache.get(2013).get(6).get("renmin") + cache.get(2013).get(5).get("renmin");
         int total2 = cache.get(2013).get(7).get("total") + cache.get(2013).get(6).get("total") + cache.get(2013).get(5).get("total");
-        sb.append("2011-8-1," + zixun1 + "," + weibo1 + "," + renmin1 + ",-," + total1 + "\n");
+        sb.append("2011-8-1," + zixun1 + "," + weibo1 + "," + renmin1 + ",-," + total1 + "-\n");
         sb.append("2013-8-20," + zixun2 + "," + weibo2 + "," + renmin2 + ",-," + total2 + "\n");
+        
+        //2012-2-28、2012-6-29和2013-8-20
+        int zixun3 = cache.get(2012).get(1).get("zixun") + cache.get(2011).get(12).get("zixun") + cache.get(2011).get(11).get("zixun");
+        int weibo3 = cache.get(2012).get(1).get("weibo") + cache.get(2011).get(12).get("weibo") + cache.get(2011).get(11).get("weibo");
+        int renmin3 = cache.get(2012).get(1).get("renmin") + cache.get(2011).get(12).get("renmin") + cache.get(2011).get(11).get("renmin");
+        
+        int zixun4 = cache.get(2012).get(5).get("zixun") + cache.get(2012).get(4).get("zixun") + cache.get(2012).get(3).get("zixun");
+        int weibo4 = cache.get(2012).get(5).get("weibo") + cache.get(2012).get(4).get("weibo") + cache.get(2012).get(3).get("weibo");
+        int renmin4 = cache.get(2012).get(5).get("renmin") + cache.get(2012).get(4).get("renmin") + cache.get(2012).get(3).get("renmin");
+        
+        int zixun5 = cache.get(2013).get(7).get("zixun") + cache.get(2013).get(6).get("zixun") + cache.get(2013).get(5).get("zixun");
+        int weibo5 = cache.get(2013).get(7).get("weibo") + cache.get(2013).get(6).get("weibo") + cache.get(2013).get(5).get("weibo");
+        int renmin5 = cache.get(2013).get(7).get("renmin") + cache.get(2013).get(6).get("renmin") + cache.get(2013).get(5).get("renmin");
+        
+        sb.append("2012-2-28," + zixun3 + "," + weibo3 + "," + renmin3 + ",-,-\n");
+        sb.append("2012-6-29," + zixun4 + "," + weibo4 + "," + renmin4 + ",-,-\n");
+        sb.append("2013-8-20," + zixun5 + "," + weibo5 + "," + renmin5 + ",-,-\n");
         //追加2014年2、3、4月统计信息
         sb.append("\n");
         sb.append("-----------------2014年2-4月统计信息\n");
         sb.append("2014-2," + cache.get(2014).get(2).get("zixun") + "," + cache.get(2014).get(2).get("weibo") + "," + cache.get(2014).get(2).get("renmin") + ",-,-\n");
         sb.append("2014-3," + cache.get(2014).get(3).get("zixun") + "," + cache.get(2014).get(3).get("weibo") + "," + cache.get(2014).get(3).get("renmin") + ",-,-\n");
         sb.append("2014-4," + cache.get(2014).get(4).get("zixun") + "," + cache.get(2014).get(4).get("weibo") + "," + cache.get(2014).get(4).get("renmin") + ",-,-\n");
-        String out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-13\\violence_tongji.csv";
+        String out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-15\\violence_tongji.csv";
         BufferedWriter bw = new BufferedWriter(new FileWriter(out));
         bw.write(sb.toString());
         bw.close();
