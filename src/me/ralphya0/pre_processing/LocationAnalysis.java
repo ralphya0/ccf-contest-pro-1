@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -350,8 +351,88 @@ public class LocationAnalysis {
         
     }
     
+    //单独处理公交爆炸事件表，提取地点信息，为后续处理做准备
+    public void fun3() throws IOException{
+        Map<Integer,Map<String,Integer>> cache = new HashMap<Integer,Map<String,Integer>>();
+        //Map<Integer,List<String>> records = new HashMap<Integer,List<String>>();
+        
+        String in = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-14\\Basetable_split_location1.csv";
+        BufferedReader br = new BufferedReader(new FileReader(in));
+        String l = "";
+        while((l = br.readLine()) != null){
+            String [] arr = l.split(",");
+            if(arr != null){
+                //话题
+                int topic = Integer.parseInt(arr[2]);
+                if(topic != 3){
+                    continue;
+                }
+                else{
+                    //公交爆炸话题下的不同事件类别
+                    Integer type = Integer.parseInt(arr[16]);
+                    String province = arr[6];
+                    if(type != null){
+                        
+                        if(!cache.containsKey(type)){
+                            Map<String,Integer> mm = new HashMap<String,Integer>();
+                            cache.put(type, mm);
+                            //List<String> ll = new ArrayList<String>();
+                            //records.put(type, ll);
+                        }
+                        
+                        //records.get(type).add(l);
+                        
+                        if(province != null && province.trim().length() > 0){
+                            if(!cache.get(type).containsKey(province)){
+                                cache.get(type).put(province, 1);
+                            }
+                            else{
+                                cache.get(type).put(province, cache.get(type).get(province) + 1);
+                                
+                            }
+                        }
+                        
+                    }
+                }
+            }
+            
+        }
+        br.close();
+        
+        //输出统计信息
+        StringBuilder sb = new StringBuilder();
+        sb.append("公交爆炸新闻省份信息统计：\n");
+        sb.append("事件类别,省份#出现次数\n");
+        Integer[] arr = cache.keySet().toArray(new Integer[0]);
+        
+        if(arr != null) {
+            Arrays.sort(arr);
+            for(Integer i : arr){
+                sb.append(i + ",");
+                String [] tmp1 = cache.get(i).keySet().toArray(new String[0]);
+                if(tmp1 != null){
+                    for(String s : tmp1){
+                        sb.append(s + "#" + cache.get(i).get(s) + ",");
+                        
+                    }
+                    if(sb.lastIndexOf(",") == sb.length() - 1){
+                        sb.deleteCharAt(sb.length() - 1);
+                        
+                    }
+                    sb.append("\n");
+                }
+                
+            }
+            String out = "F:\\work-space\\project-base\\ccf\\data\\公共安全事件\\result\\2014-11-16\\公交爆炸省份统计.csv";
+            BufferedWriter bw = new BufferedWriter(new FileWriter(out));
+            bw.write(sb.toString());
+            bw.close();
+            System.out.println("done");
+        }
+    }
+    
     public static void main(String[] args) throws IOException {
-        new LocationAnalysis().fun2();
+        new LocationAnalysis().fun3();
         
     }
 }
