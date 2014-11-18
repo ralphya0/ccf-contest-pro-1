@@ -204,6 +204,11 @@ public class EmotionAnalysis {
             bw.close();
             System.out.println("done");
         }
+        st1.close();
+        st2.close();
+        st3.close();
+        st4.close();
+        connection.close();
     }
     
     public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
