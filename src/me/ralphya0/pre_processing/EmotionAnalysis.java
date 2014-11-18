@@ -39,11 +39,9 @@ public class EmotionAnalysis {
         while((l = br.readLine()) != null){
             String [] arr = l.split(",");
             if(arr != null){
-                if(!event_list.containsKey(arr[0])){
                     Map<String,Double> mm = new HashMap<String,Double>();
                     
                     event_list.put(arr[0].replaceAll("/", "-"), mm);
-                }
             }
         }
         br.close();
@@ -73,19 +71,19 @@ public class EmotionAnalysis {
         Statement st3 = connection.createStatement();
         Statement st4 = connection.createStatement();
         
-        String sql1 = "select content_format from violence_cluster where release_date_day < '@1' and release_date_day >= '#2' and source_type = 4";
-        String sql2 = "select count(*) from violence_cluster where release_date_day < '@1' and release_date_day >= '#2' and source_type = 4";
-        String sql3 = "select count(*) from violence_cluster where release_date_day < '@1' and release_date_day >= '#2' and source_type = 0";
-        String sql4 = "select count(*) from violence_cluster where release_date_day < '@1' and release_date_day >= '#2' and (media_name like '%人民网 公安部 法制网%' or media_name like '%公安部%' or media_name like '%法制网%')";
+        String sql1 = "select format_content from violence_cluster where release_date_day <= '@1' and release_date_day >= '#2' and source_type = 4";
+        String sql2 = "select count(*) from violence_cluster where release_date_day <= '@1' and release_date_day >= '#2' and source_type = 4";
+        String sql3 = "select count(*) from violence_cluster where release_date_day <= '@1' and release_date_day >= '#2' and source_type = 0";
+        String sql4 = "select count(*) from violence_cluster where release_date_day <= '@1' and release_date_day >= '#2' and (media_name like '%人民网 公安部 法制网%' or media_name like '%公安部%' or media_name like '%法制网%')";
         String [] arr = event_list.keySet().toArray(new String[0]);
         if(arr != null){
             for(String s : arr){
                 //查找当前暴恐事件发生inter天时间内的微博信息
                 String [] arr2 = s.split("-");
                 if(arr2 != null){
-                    int day_curr = Integer.parseInt(arr[2]);
-                    int month_curr = Integer.parseInt(arr[1]);
-                    int year_curr  = Integer.parseInt(arr[0]);
+                    int day_curr = Integer.parseInt(arr2[2]);
+                    int month_curr = Integer.parseInt(arr2[1]);
+                    int year_curr  = Integer.parseInt(arr2[0]);
                     
                     //构造时间窗口
                     int year = 0;
